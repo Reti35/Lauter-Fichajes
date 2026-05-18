@@ -1,0 +1,203 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options directory
+.vs/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Rider IDE
+.idea/
+*.sln.iml
+*.iml
+*.hprof
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Local History for Visual Studio
+.localhistory/
+
+# BeatPulse Health Checks
+healthchecksdb
+healthchecksdb-shm
+healthchecksdb-wal
+
+# MAUI specific
+bin/
+obj/
+*.apk
+*.apks
+*.aab
+*.exe
+*.dll
+*.so
+*.dylib
+*.deb
+*.appx
+*.appxbundle
+*.msix
+*.app
+
+# Emulator and simulator data
+.android/
+.ios/
+.simulator/
+
+# NuGet
+*.nupkg
+*.nupkg.metadata
+*.nuspec
+*.snupkg
+.nuget/
+
+# Package manager lock files
+packages.lock.json
+paket.lock
+Paket.Restore.targets
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+*.mdb
+*.sqlite
+*.sqlite3
+
+# User secrets
+**/appsettings.local.json
+secrets.json
+.user.secrets
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+[Dd]esktop.ini
+
+# Backup files
+*.bak
+*.back
+*.backup
+*~
+*.swp
+*.swo
+*~
+
+# IDE extensions
+.editorconfig.user
+
+# Azure
+azure-pipelines.yml.user
+
+# Logs
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Documentation generated
+docs/_build/
+site/
+
+# Configuration files with sensitive data
+appsettings.json
+appsettings.*.json
+!appsettings.example.json
+
+# Platform-specific binaries
+Platforms/Android/bin/
+Platforms/Android/obj/
+Platforms/iOS/bin/
+Platforms/iOS/obj/
+Platforms/Windows/bin/
+Platforms/Windows/obj/
+Platforms/MacCatalyst/bin/
+Platforms/MacCatalyst/obj/
+
+# Java
+*.class
+*.jar
+*.war
+
+# Gradle
+.gradle/
+gradle/
+*.gradle
+
+# Cocoapods
+Pods/
+Podfile.lock
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xcuserdatad/
+
+# iOS
+DerivedData/
+*.dSYM/
+
+# Android
+local.properties
+project.properties
+ant.properties
+.android/
+sdk.properties
+signing.properties
+
+# Misc files to exclude
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.hypothesis/
+coverage.xml
+*.prof
+
+# Git merge
+*.rej
+*.orig
