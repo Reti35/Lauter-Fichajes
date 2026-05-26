@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lauter_Fichaje.ViewModels"
+             x:DataType="vm:LoginViewModel"
+             x:Class="Lauter_Fichaje.Views.LoginPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource Primary}">
+
+    <Grid RowDefinitions="*,Auto,*">
+        <VerticalStackLayout Grid.Row="1" Padding="32,0" Spacing="0">
+
+            <Label Text="Lauter Fichaje"
+                   FontSize="30"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,8"/>
+
+            <Label Text="Control de fichajes"
+                   FontSize="14"
+                   TextColor="#CCFFFFFF"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,32"/>
+
+            <Border BackgroundColor="White"
+                    StrokeThickness="0"
+                    Padding="24,20">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14">
+
+                    <Entry Placeholder="Email"
+                           Keyboard="Email"
+                           Text="{Binding Email}"
+                           ReturnType="Next"
+                           ClearButtonVisibility="WhileEditing"/>
+
+                    <Entry Placeholder="Contraseña"
+                           IsPassword="True"
+                           Text="{Binding Password}"
+                           ReturnType="Go"
+                           ReturnCommand="{Binding LoginCommand}"/>
+
+                    <Label Text="{Binding ErrorMessage}"
+                           TextColor="Red"
+                           FontSize="13"
+                           IsVisible="{Binding HasError}"/>
+
+                    <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                       IsVisible="{Binding IsLoading}"
+                                       Color="{StaticResource Primary}"
+                                       HeightRequest="32"/>
+
+                    <Button Text="Entrar"
+                            Command="{Binding LoginCommand}"
+                            IsEnabled="{Binding IsNotLoading}"
+                            BackgroundColor="{StaticResource Primary}"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="48"
+                            FontAttributes="Bold"/>
+
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>
