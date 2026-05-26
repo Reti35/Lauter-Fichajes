@@ -1,10 +1,20 @@
-﻿namespace Lauter_Fichaje
+using Lauter_Fichaje.Views;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Lauter_Fichaje;
+
+public class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell()
     {
-        public AppShell()
+        Items.Add(new ShellContent
         {
-            InitializeComponent();
-        }
+            Route = "main",
+            ContentTemplate = new DataTemplate(() =>
+                IPlatformApplication.Current!.Services.GetRequiredService<MainPage>())
+        });
+
+        Routing.RegisterRoute("login", typeof(LoginPage));
+        Routing.RegisterRoute("export", typeof(ExportPage));
     }
 }

@@ -1,3 +1,8 @@
+# Supabase credentials (never commit)
+# SupabaseConfig.cs ya NO contiene credenciales — puede commitearse.
+# Las credenciales reales van en Secrets.props (gitignoreado).
+Secrets.props
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

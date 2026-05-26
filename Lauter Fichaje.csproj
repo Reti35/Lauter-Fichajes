@@ -1,5 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+	<!-- ─── Credenciales de Supabase ─────────────────────────────────────────────
+	     En desarrollo: crea Secrets.props copiando Secrets.template.props.
+	     En CI/CD: pasa -p:SupabaseUrl=... -p:SupabaseAnonKey=...
+	     Ambas vías inyectan los valores como AssemblyMetadata en tiempo de build.
+	     Nunca pongas credenciales reales en este archivo. -->
+	<Import Project="Secrets.props" Condition="Exists('Secrets.props')" />
+
+	<Target Name="ValidateSupabaseCredentials" BeforeTargets="BeforeBuild">
+		<Error Condition="'$(SupabaseUrl)' == ''"
+		       Text="SupabaseUrl no está definida.%0ACopia 'Secrets.template.props' como 'Secrets.props' y rellena tus credenciales.%0AAlternativamente: dotnet build -p:SupabaseUrl=URL -p:SupabaseAnonKey=KEY" />
+		<Error Condition="'$(SupabaseAnonKey)' == ''"
+		       Text="SupabaseAnonKey no está definida.%0ACopia 'Secrets.template.props' como 'Secrets.props' y rellena tus credenciales.%0AAlternativamente: dotnet build -p:SupabaseUrl=URL -p:SupabaseAnonKey=KEY" />
+	</Target>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+			<_Parameter1>SupabaseUrl</_Parameter1>
+			<_Parameter2>$(SupabaseUrl)</_Parameter2>
+		</AssemblyAttribute>
+		<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+			<_Parameter1>SupabaseAnonKey</_Parameter1>
+			<_Parameter2>$(SupabaseAnonKey)</_Parameter2>
+		</AssemblyAttribute>
+	</ItemGroup>
+
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
@@ -66,8 +91,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.18.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+		<PackageReference Include="supabase-csharp" Version="0.16.2" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.9" />
+		<PackageReference Include="MiniExcel" Version="1.31.3" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
 	</ItemGroup>
 
 </Project>
