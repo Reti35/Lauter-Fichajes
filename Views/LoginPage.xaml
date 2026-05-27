@@ -5,7 +5,7 @@
              x:DataType="vm:LoginViewModel"
              x:Class="Lauter_Fichaje.Views.LoginPage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="{StaticResource Primary}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}">
 
     <Grid RowDefinitions="*,Auto,*">
         <VerticalStackLayout Grid.Row="1" Padding="32,0" Spacing="0">
@@ -23,7 +23,7 @@
                    HorizontalTextAlignment="Center"
                    Margin="0,0,0,32"/>
 
-            <Border BackgroundColor="White"
+            <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark={StaticResource AppCardBgDark}}"
                     StrokeThickness="0"
                     Padding="24,20">
                 <Border.StrokeShape>
@@ -44,20 +44,19 @@
                            ReturnCommand="{Binding LoginCommand}"/>
 
                     <Label Text="{Binding ErrorMessage}"
-                           TextColor="Red"
+                           TextColor="{AppThemeBinding Light={StaticResource AppDangerLight}, Dark={StaticResource AppDangerDark}}"
                            FontSize="13"
                            IsVisible="{Binding HasError}"/>
 
                     <ActivityIndicator IsRunning="{Binding IsLoading}"
                                        IsVisible="{Binding IsLoading}"
-                                       Color="{StaticResource Primary}"
                                        HeightRequest="32"/>
 
                     <Button Text="Entrar"
                             Command="{Binding LoginCommand}"
                             IsEnabled="{Binding IsNotLoading}"
-                            BackgroundColor="{StaticResource Primary}"
-                            TextColor="White"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="{AppThemeBinding Light=White, Dark={StaticResource PrimaryDarkText}}"
                             CornerRadius="8"
                             HeightRequest="48"
                             FontAttributes="Bold"/>

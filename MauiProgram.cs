@@ -34,6 +34,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IAuthService, AuthService>();
         builder.Services.AddSingleton<IFichajeService, FichajeService>();
         builder.Services.AddSingleton<IExportService, ExportService>();
+        builder.Services.AddSingleton<ILocationService, LocationService>();
 
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<LoginPage>();

@@ -11,6 +11,7 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly IAuthService _authService;
     private readonly IFichajeService _fichajeService;
+    private readonly ILocationService _locationService;
     private string _userId = string.Empty;
     private int _currentPage;
     private const int PageSize = 10;
@@ -30,10 +31,11 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<Fichaje> Fichajes { get; } = [];
 
-    public MainViewModel(IAuthService authService, IFichajeService fichajeService)
+    public MainViewModel(IAuthService authService, IFichajeService fichajeService, ILocationService locationService)
     {
         _authService = authService;
         _fichajeService = fichajeService;
+        _locationService = locationService;
         UserName = string.Empty;
         RoleDisplay = string.Empty;
         StatusText = "Fuera";
@@ -107,8 +109,15 @@ public partial class MainViewModel : ObservableObject
         IsLoading = true;
         try
         {
+            // Intentar obtener ubicación (null si denegado o no disponible)
+            var location = await _locationService.GetCurrentLocationAsync();
+
             var type = IsDentro ? "salida" : "entrada";
-            var fichaje = await _fichajeService.RegisterAsync(_userId, type);
+            var fichaje = await _fichajeService.RegisterAsync(
+                _userId, type,
+                location?.Latitude,
+                location?.Longitude);
+
             Fichajes.Insert(0, fichaje);
             IsDentro = type == "entrada";
             StatusText = IsDentro ? "Dentro" : "Fuera";

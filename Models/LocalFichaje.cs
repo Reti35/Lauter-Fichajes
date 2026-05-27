@@ -11,4 +11,6 @@ public class LocalFichaje
     public string Type { get; set; } = string.Empty;
     public DateTime Timestamp { get; set; }
     public bool Synced { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 }

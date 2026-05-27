@@ -27,6 +27,26 @@
     <Color x:Key="Gray900">#212121</Color>
     <Color x:Key="Gray950">#141414</Color>
 
+    <!-- ── Semantic tokens — Light theme ─────────────────────────────── -->
+    <Color x:Key="AppPageBgLight">#F3F4F6</Color>
+    <Color x:Key="AppCardBgLight">#FFFFFF</Color>
+    <Color x:Key="AppTextPrimaryLight">#111827</Color>
+    <Color x:Key="AppTextSecondaryLight">#374151</Color>
+    <Color x:Key="AppTextMutedLight">#6B7280</Color>
+    <Color x:Key="AppTextFaintLight">#9CA3AF</Color>
+    <Color x:Key="AppSuccessLight">#16A34A</Color>
+    <Color x:Key="AppDangerLight">#DC2626</Color>
+
+    <!-- ── Semantic tokens — Dark theme ──────────────────────────────── -->
+    <Color x:Key="AppPageBgDark">#111827</Color>
+    <Color x:Key="AppCardBgDark">#1F2937</Color>
+    <Color x:Key="AppTextPrimaryDark">#F9FAFB</Color>
+    <Color x:Key="AppTextSecondaryDark">#E5E7EB</Color>
+    <Color x:Key="AppTextMutedDark">#9CA3AF</Color>
+    <Color x:Key="AppTextFaintDark">#6B7280</Color>
+    <Color x:Key="AppSuccessDark">#22C55E</Color>
+    <Color x:Key="AppDangerDark">#F87171</Color>
+
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>

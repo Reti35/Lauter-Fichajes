@@ -34,7 +34,7 @@ public class FichajeService : IFichajeService
         return local is null ? null : MapToDomain(local);
     }
 
-    public async Task<Fichaje> RegisterAsync(string userId, string type)
+    public async Task<Fichaje> RegisterAsync(string userId, string type, double? latitude = null, double? longitude = null)
     {
         var db = await GetDbAsync();
         var fichaje = new LocalFichaje
@@ -43,7 +43,9 @@ public class FichajeService : IFichajeService
             UserId = userId,
             Type = type,
             Timestamp = DateTime.UtcNow,
-            Synced = false
+            Synced = false,
+            Latitude = latitude,
+            Longitude = longitude
         };
         await db.InsertAsync(fichaje);
         _ = TrySyncAsync(fichaje); // fire and forget
@@ -94,10 +96,12 @@ public class FichajeService : IFichajeService
         {
             await _supabase.From<SupabaseFichaje>().Upsert(new SupabaseFichaje
             {
-                Id       = fichaje.Id,
-                UserId   = fichaje.UserId,
-                Type     = fichaje.Type,
-                Timestamp = fichaje.Timestamp
+                Id        = fichaje.Id,
+                UserId    = fichaje.UserId,
+                Type      = fichaje.Type,
+                Timestamp = fichaje.Timestamp,
+                Latitude  = fichaje.Latitude,
+                Longitude = fichaje.Longitude
             });
             fichaje.Synced = true;
             var db = await GetDbAsync();
@@ -134,11 +138,13 @@ public class FichajeService : IFichajeService
             .Where(r => !localIds.Contains(r.Id))
             .Select(r => new LocalFichaje
             {
-                Id       = r.Id,
-                UserId   = r.UserId,
-                Type     = r.Type,
+                Id        = r.Id,
+                UserId    = r.UserId,
+                Type      = r.Type,
                 Timestamp = r.Timestamp,
-                Synced   = true
+                Synced    = true,
+                Latitude  = r.Latitude,
+                Longitude = r.Longitude
             })
             .ToList();
 
@@ -168,21 +174,25 @@ public class FichajeService : IFichajeService
             var local = f.Timestamp.ToLocalTime();
             return new FichajeExportRow
             {
-                Empleado = user.FullName ?? "Desconocido",
-                Email = user.Email ?? string.Empty,
-                Tipo = f.Type == "entrada" ? "Entrada" : "Salida",
-                Fecha = local.ToString("dd/MM/yyyy"),
-                Hora = local.ToString("HH:mm")
+                Empleado  = user.FullName ?? "Desconocido",
+                Email     = user.Email ?? string.Empty,
+                Tipo      = f.Type == "entrada" ? "Entrada" : "Salida",
+                Fecha     = local.ToString("dd/MM/yyyy"),
+                Hora      = local.ToString("HH:mm"),
+                Latitud   = f.Latitude.HasValue  ? f.Latitude.Value.ToString("F5")  : string.Empty,
+                Longitud  = f.Longitude.HasValue ? f.Longitude.Value.ToString("F5") : string.Empty
             };
         }).ToList();
     }
 
     private static Fichaje MapToDomain(LocalFichaje f) => new()
     {
-        Id = f.Id,
-        UserId = f.UserId,
-        Type = f.Type,
+        Id        = f.Id,
+        UserId    = f.UserId,
+        Type      = f.Type,
         Timestamp = f.Timestamp.ToLocalTime(),
-        Synced = f.Synced
+        Synced    = f.Synced,
+        Latitude  = f.Latitude,
+        Longitude = f.Longitude
     };
 }

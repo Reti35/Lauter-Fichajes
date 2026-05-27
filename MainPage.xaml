@@ -6,13 +6,13 @@
              x:DataType="vm:MainViewModel"
              x:Class="Lauter_Fichaje.MainPage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="#F3F4F6">
+             BackgroundColor="{AppThemeBinding Light={StaticResource AppPageBgLight}, Dark={StaticResource AppPageBgDark}}">
 
     <Grid RowDefinitions="Auto,*">
 
         <!-- Header fijo -->
         <Grid Grid.Row="0"
-              BackgroundColor="{StaticResource Primary}"
+              BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}"
               Padding="20,16"
               ColumnDefinitions="*,Auto,Auto">
             <VerticalStackLayout Grid.Column="0" Spacing="2">
@@ -58,7 +58,7 @@
                 <VerticalStackLayout Padding="16" Spacing="12">
 
                     <!-- Tarjeta de estado -->
-                    <Border BackgroundColor="White"
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark={StaticResource AppCardBgDark}}"
                             StrokeThickness="0"
                             Padding="20,16">
                         <Border.StrokeShape>
@@ -67,17 +67,17 @@
                         <Grid ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Estado actual"
-                                       TextColor="#6B7280"
+                                       TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"
                                        FontSize="13"/>
                                 <Label Text="{Binding StatusText}"
                                        FontSize="22"
                                        FontAttributes="Bold">
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label" Binding="{Binding IsDentro}" Value="True">
-                                            <Setter Property="TextColor" Value="#16A34A"/>
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light=#16A34A, Dark=#22C55E}"/>
                                         </DataTrigger>
                                         <DataTrigger TargetType="Label" Binding="{Binding IsDentro}" Value="False">
-                                            <Setter Property="TextColor" Value="#DC2626"/>
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light=#DC2626, Dark=#F87171}"/>
                                         </DataTrigger>
                                     </Label.Triggers>
                                 </Label>
@@ -87,10 +87,10 @@
                                      VerticalOptions="Center">
                                 <Ellipse.Triggers>
                                     <DataTrigger TargetType="Ellipse" Binding="{Binding IsDentro}" Value="True">
-                                        <Setter Property="Fill" Value="#16A34A"/>
+                                        <Setter Property="Fill" Value="{AppThemeBinding Light=#16A34A, Dark=#22C55E}"/>
                                     </DataTrigger>
                                     <DataTrigger TargetType="Ellipse" Binding="{Binding IsDentro}" Value="False">
-                                        <Setter Property="Fill" Value="#DC2626"/>
+                                        <Setter Property="Fill" Value="{AppThemeBinding Light=#DC2626, Dark=#F87171}"/>
                                     </DataTrigger>
                                 </Ellipse.Triggers>
                             </Ellipse>
@@ -101,22 +101,21 @@
                     <Button Text="{Binding ActionButtonText}"
                             Command="{Binding RegisterFichajeCommand}"
                             IsEnabled="{Binding IsNotLoading}"
-                            BackgroundColor="{StaticResource Primary}"
-                            TextColor="White"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="{AppThemeBinding Light=White, Dark={StaticResource PrimaryDarkText}}"
                             CornerRadius="10"
                             HeightRequest="52"
                             FontSize="16"
                             FontAttributes="Bold"/>
 
                     <ActivityIndicator IsRunning="{Binding IsLoading}"
-                                       IsVisible="{Binding IsLoading}"
-                                       Color="{StaticResource Primary}"/>
+                                       IsVisible="{Binding IsLoading}"/>
 
                     <!-- Título historial -->
                     <Label Text="Mis fichajes"
                            FontSize="15"
                            FontAttributes="Bold"
-                           TextColor="#374151"
+                           TextColor="{AppThemeBinding Light={StaticResource AppTextSecondaryLight}, Dark={StaticResource AppTextSecondaryDark}}"
                            Margin="0,8,0,0"/>
                 </VerticalStackLayout>
             </CollectionView.Header>
@@ -124,35 +123,41 @@
             <!-- Cada fichaje -->
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Fichaje">
-                    <Border BackgroundColor="White"
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark={StaticResource AppCardBgDark}}"
                             StrokeThickness="0"
                             Margin="16,0,16,8"
                             Padding="16,12">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="10"/>
                         </Border.StrokeShape>
-                        <Grid ColumnDefinitions="12,*,Auto">
-                            <BoxView Grid.Column="0"
+                        <Grid ColumnDefinitions="12,*,Auto"
+                              RowDefinitions="Auto,Auto">
+                            <BoxView Grid.Column="0" Grid.RowSpan="2"
                                      CornerRadius="6"
                                      WidthRequest="8" HeightRequest="8"
                                      VerticalOptions="Center">
                                 <BoxView.Triggers>
                                     <DataTrigger TargetType="BoxView" Binding="{Binding IsEntrada}" Value="True">
-                                        <Setter Property="Color" Value="#16A34A"/>
+                                        <Setter Property="Color" Value="{AppThemeBinding Light=#16A34A, Dark=#22C55E}"/>
                                     </DataTrigger>
                                     <DataTrigger TargetType="BoxView" Binding="{Binding IsEntrada}" Value="False">
-                                        <Setter Property="Color" Value="#DC2626"/>
+                                        <Setter Property="Color" Value="{AppThemeBinding Light=#DC2626, Dark=#F87171}"/>
                                     </DataTrigger>
                                 </BoxView.Triggers>
                             </BoxView>
-                            <Label Grid.Column="1"
+                            <Label Grid.Row="0" Grid.Column="1"
                                    Text="{Binding TypeDisplay}"
                                    FontAttributes="Bold"
                                    FontSize="15"
                                    VerticalOptions="Center"/>
-                            <Label Grid.Column="2"
+                            <Label Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding LocationDisplay}"
+                                   IsVisible="{Binding HasLocation}"
+                                   TextColor="{AppThemeBinding Light={StaticResource AppTextFaintLight}, Dark={StaticResource AppTextFaintDark}}"
+                                   FontSize="11"/>
+                            <Label Grid.Row="0" Grid.Column="2"
                                    Text="{Binding FormattedTime}"
-                                   TextColor="#6B7280"
+                                   TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"
                                    FontSize="13"
                                    VerticalOptions="Center"/>
                         </Grid>
@@ -167,8 +172,8 @@
                             Command="{Binding LoadMoreCommand}"
                             IsVisible="{Binding HasMore}"
                             BackgroundColor="Transparent"
-                            TextColor="{StaticResource Primary}"
-                            BorderColor="{StaticResource Primary}"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            BorderColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                             BorderWidth="1"
                             CornerRadius="8"
                             HeightRequest="44"/>
