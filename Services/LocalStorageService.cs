@@ -67,4 +67,10 @@ public class LocalStorageService : ILocalStorageService
         var db = await GetDbAsync();
         await db.DeleteAllAsync<LocalSession>();
     }
+
+    public async Task<List<LocalUser>> GetAllUsersAsync()
+    {
+        var db = await GetDbAsync();
+        return await db.Table<LocalUser>().ToListAsync();
+    }
 }

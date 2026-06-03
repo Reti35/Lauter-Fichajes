@@ -11,4 +11,6 @@ public interface ILocalStorageService
     Task<string?> GetSessionUserIdAsync();
     Task SaveSessionAsync(string userId);
     Task ClearSessionAsync();
+    /// <summary>Devuelve todos los usuarios guardados localmente (para el filtro de empleados).</summary>
+    Task<List<LocalUser>> GetAllUsersAsync();
 }

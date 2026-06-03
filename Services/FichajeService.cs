@@ -24,6 +24,29 @@ public class FichajeService : IFichajeService
         return _db;
     }
 
+    public async Task<List<Fichaje>> GetFilteredAsync(
+        string userId, bool includeAll, string? filterByUserId, DateTime? from, DateTime? to)
+    {
+        var db = await GetDbAsync();
+
+        // Pre-computar límites UTC para que sqlite-net-pcl pueda traducirlos a SQL
+        DateTime? fromUtc = from.HasValue ? from.Value.Date.ToUniversalTime() : null;
+        DateTime? toUtc   = to.HasValue   ? to.Value.Date.AddDays(1).ToUniversalTime() : null;
+
+        var query = db.Table<LocalFichaje>();
+
+        if (!includeAll)
+            query = query.Where(f => f.UserId == userId);
+        else if (filterByUserId is not null)
+            query = query.Where(f => f.UserId == filterByUserId);
+
+        if (fromUtc.HasValue) { var f = fromUtc.Value; query = query.Where(x => x.Timestamp >= f); }
+        if (toUtc.HasValue)   { var t = toUtc.Value;   query = query.Where(x => x.Timestamp < t);  }
+
+        var rows = await query.OrderByDescending(x => x.Timestamp).ToListAsync();
+        return rows.Select(MapToDomain).ToList();
+    }
+
     public async Task<Fichaje?> GetLastFichajeAsync(string userId)
     {
         var db = await GetDbAsync();
