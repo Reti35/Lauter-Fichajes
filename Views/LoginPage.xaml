@@ -5,66 +5,116 @@
              x:DataType="vm:LoginViewModel"
              x:Class="Lauter_Fichaje.Views.LoginPage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}">
+             BackgroundColor="#EBEBEB">
 
-    <Grid RowDefinitions="*,Auto,*">
-        <VerticalStackLayout Grid.Row="1" Padding="32,0" Spacing="0">
+    <!-- Fondo gris neutro plano, sin gradiente ni imagen — replica exacta del login web -->
+    <ScrollView>
+        <Grid RowDefinitions="*,Auto,2*" MinimumHeightRequest="560">
 
-            <Label Text="Lauter Fichaje"
-                   FontSize="30"
-                   FontAttributes="Bold"
-                   TextColor="White"
-                   HorizontalTextAlignment="Center"
-                   Margin="0,0,0,8"/>
+            <!-- Formulario en el tercio superior (~33% desde el top, igual que la web) -->
+            <VerticalStackLayout Grid.Row="1"
+                                 HorizontalOptions="Center"
+                                 WidthRequest="300"
+                                 Spacing="0">
 
-            <Label Text="Control de fichajes"
-                   FontSize="14"
-                   TextColor="#CCFFFFFF"
-                   HorizontalTextAlignment="Center"
-                   Margin="0,0,0,32"/>
+                <!-- Logo-watermark "Lauter": tipografía grande en gris fantasma, efecto marca de agua -->
+                <Label Text="Lauter"
+                       FontSize="62"
+                       FontAttributes="Bold"
+                       TextColor="#D0D0D0"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,0,0,2"/>
 
-            <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark={StaticResource AppCardBgDark}}"
-                    StrokeThickness="0"
-                    Padding="24,20">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="12"/>
-                </Border.StrokeShape>
-                <VerticalStackLayout Spacing="14">
+                <!-- Título principal -->
+                <Label Text="Bienvenido"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="#444444"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,0,0,4"/>
 
+                <!-- Subtítulo secundario -->
+                <Label Text="Introduce tus datos de acceso"
+                       FontSize="13"
+                       TextColor="#888888"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,0,0,24"/>
+
+                <!-- Campo Email — borde gris outlined, fondo blanco, sin íconos -->
+                <Border BackgroundColor="#FFFFFF"
+                        Stroke="#CCCCCC"
+                        StrokeThickness="1"
+                        Margin="0,0,0,10">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="3"/>
+                    </Border.StrokeShape>
                     <Entry Placeholder="Email"
                            Keyboard="Email"
                            Text="{Binding Email}"
                            ReturnType="Next"
-                           ClearButtonVisibility="WhileEditing"/>
+                           ClearButtonVisibility="WhileEditing"
+                           BackgroundColor="Transparent"
+                           PlaceholderColor="#AAAAAA"
+                           TextColor="#333333"
+                           Margin="4,0"/>
+                </Border>
 
+                <!-- Campo Contraseña — mismo estilo outlined -->
+                <Border BackgroundColor="#FFFFFF"
+                        Stroke="#CCCCCC"
+                        StrokeThickness="1"
+                        Margin="0,0,0,16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="3"/>
+                    </Border.StrokeShape>
                     <Entry Placeholder="Contraseña"
                            IsPassword="True"
                            Text="{Binding Password}"
                            ReturnType="Go"
-                           ReturnCommand="{Binding LoginCommand}"/>
+                           ReturnCommand="{Binding LoginCommand}"
+                           BackgroundColor="Transparent"
+                           PlaceholderColor="#AAAAAA"
+                           TextColor="#333333"
+                           Margin="4,0"/>
+                </Border>
 
-                    <Label Text="{Binding ErrorMessage}"
-                           TextColor="{AppThemeBinding Light={StaticResource AppDangerLight}, Dark={StaticResource AppDangerDark}}"
-                           FontSize="13"
-                           IsVisible="{Binding HasError}"/>
+                <!-- Mensaje de error -->
+                <Label Text="{Binding ErrorMessage}"
+                       TextColor="#E74C3C"
+                       FontSize="13"
+                       IsVisible="{Binding HasError}"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,0,0,8"/>
 
-                    <ActivityIndicator IsRunning="{Binding IsLoading}"
-                                       IsVisible="{Binding IsLoading}"
-                                       HeightRequest="32"/>
+                <!-- Spinner de carga -->
+                <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                   IsVisible="{Binding IsLoading}"
+                                   Color="#2EAE8F"
+                                   HeightRequest="32"
+                                   Margin="0,0,0,8"/>
 
-                    <Button Text="Entrar"
-                            Command="{Binding LoginCommand}"
-                            IsEnabled="{Binding IsNotLoading}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                            TextColor="{AppThemeBinding Light=White, Dark={StaticResource PrimaryDarkText}}"
-                            CornerRadius="8"
-                            HeightRequest="48"
-                            FontAttributes="Bold"/>
+                <!-- Botón principal — verde-teal #2EAE8F, mismo color que la web -->
+                <Button Text="Acceder"
+                        Command="{Binding LoginCommand}"
+                        IsEnabled="{Binding IsNotLoading}"
+                        BackgroundColor="#2EAE8F"
+                        TextColor="#FFFFFF"
+                        CornerRadius="3"
+                        HeightRequest="44"
+                        FontAttributes="Bold"
+                        FontSize="14"
+                        Margin="0,0,0,12"/>
 
-                </VerticalStackLayout>
-            </Border>
+                <!-- Copyright -->
+                <Label Text="© Lauter"
+                       FontSize="11"
+                       TextColor="#999999"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,4,0,0"/>
 
-        </VerticalStackLayout>
-    </Grid>
+            </VerticalStackLayout>
+
+        </Grid>
+    </ScrollView>
 
 </ContentPage>

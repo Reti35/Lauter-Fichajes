@@ -182,12 +182,25 @@ public class FichajeService : IFichajeService
         if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
             throw new InvalidOperationException("Se requiere conexión a internet para exportar");
 
+        // Ensure Supabase auth session is active; without it RLS returns an empty list silently.
+        if (_supabase.Auth.CurrentSession is null)
+        {
+            try { await _supabase.InitializeAsync(); } catch { }
+        }
+
+        if (_supabase.Auth.CurrentSession is null)
+            throw new InvalidOperationException("Sesión expirada. Vuelve a iniciar sesión.");
+
         var usersResp = await _supabase.From<SupabaseUser>().Get();
         var users = usersResp.Models.ToDictionary(u => u.Id, u => (u.FullName, u.Email));
 
+        // Use InvariantCulture so ':' is always a literal colon, never the locale time-separator.
+        var fromStr = from.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", System.Globalization.CultureInfo.InvariantCulture);
+        var toStr   = to.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", System.Globalization.CultureInfo.InvariantCulture);
+
         var fichajesResp = await _supabase.From<SupabaseFichaje>()
-            .Filter("timestamp", Operator.GreaterThanOrEqual, from.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))
-            .Filter("timestamp", Operator.LessThan, to.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))
+            .Filter("timestamp", Operator.GreaterThanOrEqual, fromStr)
+            .Filter("timestamp", Operator.LessThan, toStr)
             .Order("timestamp", Ordering.Descending)
             .Get();
 
