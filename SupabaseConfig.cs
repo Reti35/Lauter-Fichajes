@@ -14,6 +14,10 @@ internal static class SupabaseConfig
             .GetCustomAttributes<AssemblyMetadataAttribute>()
             .ToDictionary(a => a.Key, a => a.Value ?? string.Empty);
 
-    public static string Url     => _meta["SupabaseUrl"];
-    public static string AnonKey => _meta["SupabaseAnonKey"];
+    public static string Url            => _meta["SupabaseUrl"];
+    public static string AnonKey       => _meta["SupabaseAnonKey"];
+    // Service role key: bypasses RLS. Only used server-side (admin user creation).
+    // Keep out of source control — add to Secrets.props only.
+    public static string ServiceRoleKey =>
+        _meta.TryGetValue("SupabaseServiceRoleKey", out var v) ? v : string.Empty;
 }

@@ -182,10 +182,14 @@ public class FichajeService : IFichajeService
         if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
             throw new InvalidOperationException("Se requiere conexión a internet para exportar");
 
-        // Ensure Supabase auth session is active; without it RLS returns an empty list silently.
+        // Restore session from Preferences if the OS killed the process in background.
+        // SetSession exchanges the saved refresh token for a fresh access token.
         if (_supabase.Auth.CurrentSession is null)
         {
-            try { await _supabase.InitializeAsync(); } catch { }
+            var access  = Preferences.Default.Get("supa_access_token",  string.Empty);
+            var refresh = Preferences.Default.Get("supa_refresh_token", string.Empty);
+            if (!string.IsNullOrEmpty(refresh))
+                try { await _supabase.Auth.SetSession(access, refresh); } catch { }
         }
 
         if (_supabase.Auth.CurrentSession is null)

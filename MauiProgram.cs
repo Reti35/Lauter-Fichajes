@@ -26,7 +26,7 @@ public static class MauiProgram
             SupabaseConfig.AnonKey,
             new SupabaseOptions
             {
-                AutoRefreshToken = true,
+                AutoRefreshToken    = true,
                 AutoConnectRealtime = false
             }));
 
@@ -42,6 +42,8 @@ public static class MauiProgram
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<ExportViewModel>();
         builder.Services.AddTransient<ExportPage>();
+        builder.Services.AddTransient<CreateUserViewModel>();
+        builder.Services.AddTransient<CreateUserPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

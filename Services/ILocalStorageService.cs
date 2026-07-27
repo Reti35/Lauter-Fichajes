@@ -13,4 +13,6 @@ public interface ILocalStorageService
     Task ClearSessionAsync();
     /// <summary>Devuelve todos los usuarios guardados localmente (para el filtro de empleados).</summary>
     Task<List<LocalUser>> GetAllUsersAsync();
+    /// <summary>Guarda o actualiza el perfil de un usuario sin tocar su PasswordHash existente.</summary>
+    Task UpsertUserProfileAsync(User user);
 }

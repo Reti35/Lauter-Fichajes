@@ -16,5 +16,6 @@ public class AppShell : Shell
 
         Routing.RegisterRoute("login", typeof(LoginPage));
         Routing.RegisterRoute("export", typeof(ExportPage));
+        Routing.RegisterRoute("createuser", typeof(CreateUserPage));
     }
 }

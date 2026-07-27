@@ -14,6 +14,27 @@ public class AuthService : IAuthService
     {
         _supabase = supabase;
         _localStorage = localStorage;
+
+        // Save tokens to Preferences whenever GoTrue issues or refreshes a session.
+        // This survives OS background-kills because Preferences is persisted to disk.
+        _supabase.Auth.AddStateChangedListener((sender, state) =>
+        {
+            var session = _supabase.Auth.CurrentSession;
+            if (state is Supabase.Gotrue.Constants.AuthState.SignedIn
+                      or Supabase.Gotrue.Constants.AuthState.TokenRefreshed)
+            {
+                if (session is not null)
+                {
+                    Preferences.Default.Set("supa_access_token",  session.AccessToken  ?? string.Empty);
+                    Preferences.Default.Set("supa_refresh_token", session.RefreshToken ?? string.Empty);
+                }
+            }
+            else if (state == Supabase.Gotrue.Constants.AuthState.SignedOut)
+            {
+                Preferences.Default.Remove("supa_access_token");
+                Preferences.Default.Remove("supa_refresh_token");
+            }
+        });
     }
 
     public async Task<LoginResult> LoginAsync(string email, string password)
@@ -75,11 +96,15 @@ public class AuthService : IAuthService
     {
         if (_currentUser is not null) return _currentUser;
 
-        // Restore Supabase auth session from persistent storage after app restart.
-        // Without this, Supabase queries run unauthenticated and RLS returns empty results.
+        // If the OS killed the process while in background, the in-memory GoTrue session
+        // is gone. Restore from tokens persisted to Preferences by the state listener.
+        // SetSession uses the refresh token to obtain a new access token automatically.
         if (_supabase.Auth.CurrentSession is null)
         {
-            try { await _supabase.InitializeAsync(); } catch { }
+            var access  = Preferences.Default.Get("supa_access_token",  string.Empty);
+            var refresh = Preferences.Default.Get("supa_refresh_token", string.Empty);
+            if (!string.IsNullOrEmpty(refresh))
+                try { await _supabase.Auth.SetSession(access, refresh); } catch { }
         }
 
         var userId = await _localStorage.GetSessionUserIdAsync();
@@ -90,6 +115,87 @@ public class AuthService : IAuthService
 
         _currentUser = MapToUser(localUser);
         return _currentUser;
+    }
+
+    public async Task<CreateUserResult> CreateUserAsync(string fullName, string email, string password, UserRole role)
+    {
+        if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+            return new CreateUserResult(false, "Se requiere conexión a internet");
+
+        if (string.IsNullOrEmpty(SupabaseConfig.ServiceRoleKey))
+            return new CreateUserResult(false, "Service role key no configurada en Secrets.props");
+
+        var roleStr = role switch
+        {
+            UserRole.Admin   => "admin",
+            UserRole.Manager => "manager",
+            _                => "employee"
+        };
+
+        try
+        {
+            // Use the Supabase Admin REST API with the service role key.
+            // email_confirm=true creates the user as already confirmed — no email is sent.
+            // The handle_new_user trigger inserts the profile into public.users.
+            using var http = new System.Net.Http.HttpClient();
+            http.DefaultRequestHeaders.Add("apikey", SupabaseConfig.ServiceRoleKey);
+            http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", SupabaseConfig.ServiceRoleKey);
+
+            var body = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                email,
+                password,
+                email_confirm = true,
+                user_metadata = new { full_name = fullName, role = roleStr }
+            });
+
+            var response = await http.PostAsync(
+                $"{SupabaseConfig.Url}/auth/v1/admin/users",
+                new System.Net.Http.StringContent(body, System.Text.Encoding.UTF8, "application/json"));
+
+            if (response.IsSuccessStatusCode)
+                return new CreateUserResult(true);
+
+            var raw = await response.Content.ReadAsStringAsync();
+            var parsed = System.Text.Json.JsonDocument.Parse(raw).RootElement;
+            var msg = parsed.TryGetProperty("msg", out var m) ? m.GetString()
+                    : parsed.TryGetProperty("message", out var m2) ? m2.GetString()
+                    : raw;
+
+            if (msg != null && (msg.Contains("already registered", StringComparison.OrdinalIgnoreCase)
+                || msg.Contains("email_exists", StringComparison.OrdinalIgnoreCase)))
+                return new CreateUserResult(false, "Este correo ya está registrado");
+
+            return new CreateUserResult(false, msg ?? "Error desconocido");
+        }
+        catch (Exception ex)
+        {
+            return new CreateUserResult(false, ex.Message);
+        }
+    }
+
+    public async Task SyncUsersFromSupabaseAsync()
+    {
+        if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet) return;
+
+        if (_supabase.Auth.CurrentSession is null)
+        {
+            var access  = Preferences.Default.Get("supa_access_token",  string.Empty);
+            var refresh = Preferences.Default.Get("supa_refresh_token", string.Empty);
+            if (!string.IsNullOrEmpty(refresh))
+                try { await _supabase.Auth.SetSession(access, refresh); } catch { }
+        }
+
+        if (_supabase.Auth.CurrentSession is null) return;
+
+        try
+        {
+            var response = await _supabase.From<SupabaseUser>().Get();
+            foreach (var u in response.Models)
+                await _localStorage.UpsertUserProfileAsync(MapToUser(u));
+        }
+        catch { /* offline or session expired — use cached local data */ }
     }
 
     private static bool IsAuthError(Exception ex) =>

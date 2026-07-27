@@ -73,4 +73,21 @@ public class LocalStorageService : ILocalStorageService
         var db = await GetDbAsync();
         return await db.Table<LocalUser>().ToListAsync();
     }
+
+    public async Task UpsertUserProfileAsync(User user)
+    {
+        var db = await GetDbAsync();
+        var existing = await db.Table<LocalUser>().Where(u => u.Id == user.Id).FirstOrDefaultAsync();
+        var local = new LocalUser
+        {
+            Id           = user.Id,
+            Email        = user.Email,
+            FullName     = user.FullName,
+            PasswordHash = existing?.PasswordHash ?? string.Empty,
+            Role         = (int)user.Role,
+            IsActive     = user.IsActive
+        };
+        if (existing is null) await db.InsertAsync(local);
+        else await db.UpdateAsync(local);
+    }
 }

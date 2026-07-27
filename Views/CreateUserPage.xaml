@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lauter_Fichaje.ViewModels"
+             x:DataType="vm:CreateUserViewModel"
+             x:Class="Lauter_Fichaje.Views.CreateUserPage"
+             Title="Nuevo usuario"
+             BackgroundColor="{AppThemeBinding Light={StaticResource AppPageBgLight}, Dark={StaticResource AppPageBgDark}}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,16,16,32" Spacing="12">
+
+            <!-- ── Formulario ────────────────────────────────────────────── -->
+            <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark={StaticResource AppCardBgDark}}"
+                    StrokeThickness="0"
+                    Padding="16,18">
+                <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="14">
+
+                    <!-- Cabecera de sección -->
+                    <Grid ColumnDefinitions="Auto,*">
+                        <BoxView Grid.Column="0"
+                                 Color="{StaticResource Primary}"
+                                 WidthRequest="3" HeightRequest="16"
+                                 CornerRadius="2" VerticalOptions="Center"
+                                 Margin="0,0,10,0"/>
+                        <Label Grid.Column="1"
+                               Text="Datos del empleado"
+                               FontAttributes="Bold" FontSize="15"
+                               TextColor="{AppThemeBinding Light={StaticResource AppTextSecondaryLight}, Dark={StaticResource AppTextSecondaryDark}}"
+                               VerticalOptions="Center"/>
+                    </Grid>
+
+                    <!-- Nombre completo -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Nombre completo"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark=#374151}"
+                                Stroke="{AppThemeBinding Light=#CCCCCC, Dark=#4B5563}"
+                                StrokeThickness="1">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Entry Placeholder="Nombre Apellido"
+                                   Text="{Binding FullName}"
+                                   Keyboard="Default"
+                                   ReturnType="Next"
+                                   BackgroundColor="Transparent"
+                                   PlaceholderColor="{AppThemeBinding Light=#AAAAAA, Dark=#6B7280}"
+                                   TextColor="{AppThemeBinding Light={StaticResource AppTextPrimaryLight}, Dark={StaticResource AppTextPrimaryDark}}"
+                                   Margin="4,0"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Email -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Correo electrónico"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark=#374151}"
+                                Stroke="{AppThemeBinding Light=#CCCCCC, Dark=#4B5563}"
+                                StrokeThickness="1">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Entry Placeholder="empleado@empresa.com"
+                                   Text="{Binding Email}"
+                                   Keyboard="Email"
+                                   ReturnType="Next"
+                                   BackgroundColor="Transparent"
+                                   PlaceholderColor="{AppThemeBinding Light=#AAAAAA, Dark=#6B7280}"
+                                   TextColor="{AppThemeBinding Light={StaticResource AppTextPrimaryLight}, Dark={StaticResource AppTextPrimaryDark}}"
+                                   Margin="4,0"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Contraseña -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Contraseña"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark=#374151}"
+                                Stroke="{AppThemeBinding Light=#CCCCCC, Dark=#4B5563}"
+                                StrokeThickness="1">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Entry Placeholder="Mín. 6 caracteres"
+                                   Text="{Binding Password}"
+                                   IsPassword="True"
+                                   ReturnType="Next"
+                                   BackgroundColor="Transparent"
+                                   PlaceholderColor="{AppThemeBinding Light=#AAAAAA, Dark=#6B7280}"
+                                   TextColor="{AppThemeBinding Light={StaticResource AppTextPrimaryLight}, Dark={StaticResource AppTextPrimaryDark}}"
+                                   Margin="4,0"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Confirmar contraseña -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Confirmar contraseña"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark=#374151}"
+                                Stroke="{AppThemeBinding Light=#CCCCCC, Dark=#4B5563}"
+                                StrokeThickness="1">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Entry Placeholder="Repite la contraseña"
+                                   Text="{Binding ConfirmPassword}"
+                                   IsPassword="True"
+                                   ReturnType="Done"
+                                   ReturnCommand="{Binding CreateCommand}"
+                                   BackgroundColor="Transparent"
+                                   PlaceholderColor="{AppThemeBinding Light=#AAAAAA, Dark=#6B7280}"
+                                   TextColor="{AppThemeBinding Light={StaticResource AppTextPrimaryLight}, Dark={StaticResource AppTextPrimaryDark}}"
+                                   Margin="4,0"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Rol -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Rol"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark=#374151}"
+                                Stroke="{AppThemeBinding Light=#CCCCCC, Dark=#4B5563}"
+                                StrokeThickness="1">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Picker ItemsSource="{Binding Roles}"
+                                    SelectedIndex="{Binding SelectedRoleIndex, Mode=TwoWay}"
+                                    TextColor="{AppThemeBinding Light={StaticResource AppTextPrimaryLight}, Dark={StaticResource AppTextPrimaryDark}}"
+                                    BackgroundColor="Transparent"
+                                    Margin="4,0"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ── Feedback ───────────────────────────────────────────────── -->
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               Color="{StaticResource Primary}"
+                               HorizontalOptions="Center"/>
+
+            <Border IsVisible="{Binding HasStatusMessage}"
+                    StrokeThickness="0"
+                    Padding="14,10">
+                <Border.StrokeShape><RoundRectangle CornerRadius="6"/></Border.StrokeShape>
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding IsSuccess}" Value="True">
+                        <Setter Property="BackgroundColor" Value="#E8F5E9"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding IsSuccess}" Value="False">
+                        <Setter Property="BackgroundColor" Value="#FDECEA"/>
+                    </DataTrigger>
+                </Border.Triggers>
+                <Label Text="{Binding StatusMessage}"
+                       FontSize="13"
+                       HorizontalTextAlignment="Center">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsSuccess}" Value="True">
+                            <Setter Property="TextColor" Value="#27AE60"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsSuccess}" Value="False">
+                            <Setter Property="TextColor" Value="#E74C3C"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </Border>
+
+            <!-- ── Botón crear ────────────────────────────────────────────── -->
+            <Button Text="Crear usuario"
+                    Command="{Binding CreateCommand}"
+                    IsEnabled="{Binding IsNotLoading}"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="52"
+                    FontSize="16"
+                    FontAttributes="Bold"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

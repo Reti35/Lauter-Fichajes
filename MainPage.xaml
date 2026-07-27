@@ -38,9 +38,13 @@
 
         <!-- ══════════════════════════════════════════════════════════════
              CONTENIDO SCROLLABLE — CollectionView con header rico
+             Pull-to-refresh: arrastra hacia abajo para sincronizar
              ══════════════════════════════════════════════════════════════ -->
-        <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding GroupedFichajes}"
+        <RefreshView Grid.Row="1"
+                     Command="{Binding RefreshCommand}"
+                     IsRefreshing="{Binding IsRefreshing}"
+                     RefreshColor="{StaticResource Secondary}">
+        <CollectionView ItemsSource="{Binding GroupedFichajes}"
                         IsGrouped="True">
 
             <CollectionView.Header>
@@ -214,6 +218,46 @@
                             </VerticalStackLayout>
                         </Border>
                     </Grid>
+
+                    <!-- ─── Card: Crear usuario (solo admin) ──────────────── -->
+                    <Border IsVisible="{Binding IsAdmin}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark={StaticResource AppCardBgDark}}"
+                            Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#374151}"
+                            StrokeThickness="1"
+                            Padding="14,14"
+                            Margin="16,6,16,0">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToCreateUserCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border Grid.Column="0"
+                                    BackgroundColor="{AppThemeBinding Light=#EBF5FB, Dark=#1E3A5F}"
+                                    StrokeThickness="0"
+                                    Padding="10"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="50"/></Border.StrokeShape>
+                                <Label Text="👤"
+                                       FontSize="22"
+                                       HorizontalTextAlignment="Center"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label Text="Crear usuario"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource AppTextSecondaryLight}, Dark={StaticResource AppTextSecondaryDark}}"/>
+                                <Label Text="Añadir nuevo empleado o gestor"
+                                       FontSize="11"
+                                       TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"/>
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2"
+                                   Text="›"
+                                   FontSize="22"
+                                   TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+                    </Border>
 
                     <!-- ─── PANEL DE FILTROS (colapsable) ─────────────────── -->
                     <Border IsVisible="{Binding IsFilterVisible}"
@@ -401,6 +445,7 @@
             </CollectionView.Footer>
 
         </CollectionView>
+        </RefreshView>
     </Grid>
 
 </ContentPage>

@@ -25,6 +25,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] public partial string ActionButtonText { get; set; }
     [ObservableProperty] public partial bool IsDentro { get; set; }
     [ObservableProperty] public partial bool IsManagerOrAdmin { get; set; }
+    [ObservableProperty] public partial bool IsAdmin { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotLoading))]
@@ -85,6 +86,7 @@ public partial class MainViewModel : ObservableObject
             _                       => "Empleado"
         };
         IsManagerOrAdmin = user.Role is Models.UserRole.Admin or Models.UserRole.Manager;
+        IsAdmin = user.Role == Models.UserRole.Admin;
 
         if (IsManagerOrAdmin)
             await LoadEmployeesAsync();
@@ -97,6 +99,9 @@ public partial class MainViewModel : ObservableObject
     // ── Carga de empleados (admin/gestor) ──────────────────────────────
     private async Task LoadEmployeesAsync()
     {
+        // Sync from Supabase first so newly created users appear immediately.
+        await _authService.SyncUsersFromSupabaseAsync();
+
         var users = await _localStorageService.GetAllUsersAsync();
         _userNames = users.ToDictionary(u => u.Id, u => u.FullName);
 
@@ -184,6 +189,26 @@ public partial class MainViewModel : ObservableObject
         catch { /* sin conexión — se reintentará al próximo inicio */ }
     }
 
+    // ── Comando: pull-to-refresh ───────────────────────────────────────
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNotLoading))]
+    public partial bool IsRefreshing { get; set; }
+
+    [RelayCommand]
+    private async Task RefreshAsync()
+    {
+        IsRefreshing = true;
+        try
+        {
+            if (IsManagerOrAdmin)
+                await LoadEmployeesAsync();   // syncs users from Supabase + reloads list
+            await RefreshStatusAsync();
+            await LoadGroupedFichajesAsync();
+            _ = SyncAndRefreshAsync();
+        }
+        finally { IsRefreshing = false; }
+    }
+
     // ── Comandos: filtros ──────────────────────────────────────────────
     [RelayCommand]
     private void ToggleFilter() => IsFilterVisible = !IsFilterVisible;
@@ -230,6 +255,9 @@ public partial class MainViewModel : ObservableObject
     // ── Comandos: navegación ───────────────────────────────────────────
     [RelayCommand]
     private async Task GoToExportAsync() => await Shell.Current.GoToAsync("export");
+
+    [RelayCommand]
+    private async Task GoToCreateUserAsync() => await Shell.Current.GoToAsync("createuser");
 
     [RelayCommand]
     private async Task LogoutAsync()
