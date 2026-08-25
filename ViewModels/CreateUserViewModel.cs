@@ -22,6 +22,7 @@ public partial class CreateUserViewModel : ObservableObject
 
     [ObservableProperty] public partial string FullName { get; set; }
     [ObservableProperty] public partial string Email { get; set; }
+    [ObservableProperty] public partial string Dni { get; set; }
     [ObservableProperty] public partial string Password { get; set; }
     [ObservableProperty] public partial string ConfirmPassword { get; set; }
     [ObservableProperty] public partial int SelectedRoleIndex { get; set; }
@@ -36,6 +37,7 @@ public partial class CreateUserViewModel : ObservableObject
         _authService = authService;
         FullName = string.Empty;
         Email = string.Empty;
+        Dni = string.Empty;
         Password = string.Empty;
         ConfirmPassword = string.Empty;
         StatusMessage = string.Empty;
@@ -47,6 +49,7 @@ public partial class CreateUserViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(FullName) ||
             string.IsNullOrWhiteSpace(Email) ||
+            string.IsNullOrWhiteSpace(Dni) ||
             string.IsNullOrWhiteSpace(Password) ||
             string.IsNullOrWhiteSpace(ConfirmPassword))
         {
@@ -74,7 +77,7 @@ public partial class CreateUserViewModel : ObservableObject
         StatusMessage = "Creando usuario...";
 
         var role = SelectedRoleIndex == 1 ? UserRole.Manager : UserRole.Employee;
-        var result = await _authService.CreateUserAsync(FullName.Trim(), Email.Trim(), Password, role);
+        var result = await _authService.CreateUserAsync(FullName.Trim(), Email.Trim(), Password, role, Dni.Trim());
 
         IsLoading = false;
 
@@ -84,6 +87,7 @@ public partial class CreateUserViewModel : ObservableObject
             StatusMessage = $"Usuario «{FullName.Trim()}» creado correctamente";
             FullName = string.Empty;
             Email = string.Empty;
+            Dni = string.Empty;
             Password = string.Empty;
             ConfirmPassword = string.Empty;
             SelectedRoleIndex = 0;

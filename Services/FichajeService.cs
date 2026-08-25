@@ -9,6 +9,7 @@ public class FichajeService : IFichajeService
 {
     private readonly Client _supabase;
     private SQLiteAsyncConnection? _db;
+    private readonly SemaphoreSlim _initLock = new(1, 1);
 
     public FichajeService(Client supabase)
     {
@@ -18,10 +19,23 @@ public class FichajeService : IFichajeService
     private async Task<SQLiteAsyncConnection> GetDbAsync()
     {
         if (_db is not null) return _db;
-        var path = Path.Combine(FileSystem.AppDataDirectory, "lauter.db");
-        _db = new SQLiteAsyncConnection(path);
-        await _db.CreateTableAsync<LocalFichaje>();
-        return _db;
+
+        // Same race guard as LocalStorageService.GetDbAsync: without the lock, a concurrent
+        // caller can see `_db is not null` and query before CreateTableAsync has completed.
+        await _initLock.WaitAsync();
+        try
+        {
+            if (_db is not null) return _db;
+            var path = Path.Combine(FileSystem.AppDataDirectory, "lauter.db");
+            var db = new SQLiteAsyncConnection(path);
+            await db.CreateTableAsync<LocalFichaje>();
+            _db = db;
+            return _db;
+        }
+        finally
+        {
+            _initLock.Release();
+        }
     }
 
     public async Task<List<Fichaje>> GetFilteredAsync(
@@ -101,6 +115,7 @@ public class FichajeService : IFichajeService
             await TrySyncAsync(f);
     }
 
+
     public async Task SyncAllPendingAsync()
     {
         if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet) return;
@@ -177,7 +192,44 @@ public class FichajeService : IFichajeService
         return true;
     }
 
-    public async Task<List<FichajeExportRow>> GetAllForExportAsync(DateTime from, DateTime to)
+    public async Task<bool> SyncAllUsersFromSupabaseAsync()
+    {
+        if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet) return false;
+
+        var db = await GetDbAsync();
+
+        // IDs que ya tenemos localmente, de cualquier usuario
+        var localIds = (await db.Table<LocalFichaje>().ToListAsync())
+            .Select(f => f.Id)
+            .ToHashSet();
+
+        // Todos los fichajes de todos los usuarios en Supabase (permitido por la policy
+        // "Managers can read all fichajes" — solo debe llamarse para admin/gestor)
+        var response = await _supabase.From<SupabaseFichaje>()
+            .Order("timestamp", Ordering.Ascending)
+            .Get();
+
+        var toInsert = response.Models
+            .Where(r => !localIds.Contains(r.Id))
+            .Select(r => new LocalFichaje
+            {
+                Id        = r.Id,
+                UserId    = r.UserId,
+                Type      = r.Type,
+                Timestamp = r.Timestamp,
+                Synced    = true,
+                Latitude  = r.Latitude,
+                Longitude = r.Longitude
+            })
+            .ToList();
+
+        if (toInsert.Count == 0) return false;
+
+        await db.InsertAllAsync(toInsert);
+        return true;
+    }
+
+    public async Task<List<FichajeExportRow>> GetAllForExportAsync(DateTime from, DateTime to, string? filterByUserId = null)
     {
         if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
             throw new InvalidOperationException("Se requiere conexión a internet para exportar");
@@ -202,9 +254,14 @@ public class FichajeService : IFichajeService
         var fromStr = from.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", System.Globalization.CultureInfo.InvariantCulture);
         var toStr   = to.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", System.Globalization.CultureInfo.InvariantCulture);
 
-        var fichajesResp = await _supabase.From<SupabaseFichaje>()
+        var query = _supabase.From<SupabaseFichaje>()
             .Filter("timestamp", Operator.GreaterThanOrEqual, fromStr)
-            .Filter("timestamp", Operator.LessThan, toStr)
+            .Filter("timestamp", Operator.LessThan, toStr);
+
+        if (!string.IsNullOrEmpty(filterByUserId))
+            query = query.Filter("user_id", Operator.Equals, filterByUserId);
+
+        var fichajesResp = await query
             .Order("timestamp", Ordering.Descending)
             .Get();
 

@@ -12,6 +12,9 @@ public class LocalUser
     public string PasswordHash { get; set; } = string.Empty;
     public int Role { get; set; }
     public bool IsActive { get; set; }
+    public string? Dni { get; set; }
+    public DateTime? FechaAlta { get; set; }
+    public DateTime? FechaBaja { get; set; }
 }
 
 [Table("local_session")]

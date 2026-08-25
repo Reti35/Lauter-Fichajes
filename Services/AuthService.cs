@@ -56,6 +56,9 @@ public class AuthService : IAuthService
                     return new LoginResult(false, ErrorMessage: "Perfil de usuario no encontrado en la base de datos");
 
                 var user = MapToUser(supabaseUser);
+                if (!user.IsActive)
+                    return new LoginResult(false, ErrorMessage: "Tu cuenta está dada de baja. Contacta con el administrador.");
+
                 _currentUser = user;
                 await _localStorage.SaveUserAsync(user, password);
                 await _localStorage.SaveSessionAsync(user.Id);
@@ -67,7 +70,7 @@ public class AuthService : IAuthService
             }
             catch
             {
-                // Network or other error — fall through to offline
+                return new LoginResult(false, ErrorMessage: "Error al iniciar sesión");
             }
         }
 
@@ -80,6 +83,9 @@ public class AuthService : IAuthService
             return new LoginResult(false, ErrorMessage: "Credenciales incorrectas");
 
         var offlineUser = MapToUser(localUser);
+        if (!offlineUser.IsActive)
+            return new LoginResult(false, ErrorMessage: "Tu cuenta está dada de baja. Contacta con el administrador.");
+
         _currentUser = offlineUser;
         await _localStorage.SaveSessionAsync(offlineUser.Id);
         return new LoginResult(true, offlineUser);
@@ -117,7 +123,7 @@ public class AuthService : IAuthService
         return _currentUser;
     }
 
-    public async Task<CreateUserResult> CreateUserAsync(string fullName, string email, string password, UserRole role)
+    public async Task<CreateUserResult> CreateUserAsync(string fullName, string email, string password, UserRole role, string dni)
     {
         if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
             return new CreateUserResult(false, "Se requiere conexión a internet");
@@ -147,7 +153,7 @@ public class AuthService : IAuthService
                 email,
                 password,
                 email_confirm = true,
-                user_metadata = new { full_name = fullName, role = roleStr }
+                user_metadata = new { full_name = fullName, role = roleStr, dni }
             });
 
             var response = await http.PostAsync(
@@ -168,6 +174,105 @@ public class AuthService : IAuthService
                 return new CreateUserResult(false, "Este correo ya está registrado");
 
             return new CreateUserResult(false, msg ?? "Error desconocido");
+        }
+        catch (Exception ex)
+        {
+            return new CreateUserResult(false, ex.Message);
+        }
+    }
+
+    public async Task<CreateUserResult> UpdateUserProfileAsync(string userId, string fullName, string dni, UserRole role, DateTime? fechaAlta)
+    {
+        var roleStr = role switch
+        {
+            UserRole.Admin   => "admin",
+            UserRole.Manager => "manager",
+            _                => "employee"
+        };
+
+        var result = await PatchUserAsync(userId, new
+        {
+            full_name = fullName,
+            dni,
+            role = roleStr,
+            fecha_alta = fechaAlta
+        });
+
+        if (result.Success)
+        {
+            var existing = await _localStorage.GetUserByIdAsync(userId);
+            if (existing is not null)
+            {
+                var updated = MapToUser(existing);
+                updated.FullName = fullName;
+                updated.Dni = dni;
+                updated.Role = role;
+                updated.FechaAlta = fechaAlta;
+                await _localStorage.UpsertUserProfileAsync(updated);
+                if (_currentUser?.Id == userId) _currentUser = updated;
+            }
+        }
+
+        return result;
+    }
+
+    public async Task<CreateUserResult> SetUserActiveAsync(string userId, bool isActive)
+    {
+        var fechaBaja = isActive ? (DateTime?)null : DateTime.UtcNow;
+
+        var result = await PatchUserAsync(userId, new
+        {
+            is_active = isActive,
+            fecha_baja = fechaBaja
+        });
+
+        if (result.Success)
+        {
+            var existing = await _localStorage.GetUserByIdAsync(userId);
+            if (existing is not null)
+            {
+                var updated = MapToUser(existing);
+                updated.IsActive = isActive;
+                updated.FechaBaja = fechaBaja;
+                await _localStorage.UpsertUserProfileAsync(updated);
+                if (_currentUser?.Id == userId) _currentUser = updated;
+            }
+        }
+
+        return result;
+    }
+
+    private static async Task<CreateUserResult> PatchUserAsync(string userId, object patchBody)
+    {
+        if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+            return new CreateUserResult(false, "Se requiere conexión a internet");
+
+        if (string.IsNullOrEmpty(SupabaseConfig.ServiceRoleKey))
+            return new CreateUserResult(false, "Service role key no configurada en Secrets.props");
+
+        try
+        {
+            // Direct PostgREST PATCH with the service role key bypasses RLS — same pattern
+            // as CreateUserAsync — so no admin UPDATE policy is needed on public.users.
+            using var http = new System.Net.Http.HttpClient();
+            http.DefaultRequestHeaders.Add("apikey", SupabaseConfig.ServiceRoleKey);
+            http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", SupabaseConfig.ServiceRoleKey);
+            http.DefaultRequestHeaders.Add("Prefer", "return=minimal");
+
+            var body = System.Text.Json.JsonSerializer.Serialize(patchBody);
+            var request = new System.Net.Http.HttpRequestMessage(HttpMethod.Patch,
+                $"{SupabaseConfig.Url}/rest/v1/users?id=eq.{userId}")
+            {
+                Content = new System.Net.Http.StringContent(body, System.Text.Encoding.UTF8, "application/json")
+            };
+
+            var response = await http.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+                return new CreateUserResult(true);
+
+            var raw = await response.Content.ReadAsStringAsync();
+            return new CreateUserResult(false, raw);
         }
         catch (Exception ex)
         {
@@ -210,7 +315,10 @@ public class AuthService : IAuthService
         Email = u.Email,
         FullName = u.FullName,
         Role = u.GetUserRole(),
-        IsActive = u.IsActive
+        IsActive = u.IsActive,
+        Dni = u.Dni ?? string.Empty,
+        FechaAlta = u.FechaAlta,
+        FechaBaja = u.FechaBaja
     };
 
     private static User MapToUser(LocalUser u) => new()
@@ -219,6 +327,9 @@ public class AuthService : IAuthService
         Email = u.Email,
         FullName = u.FullName,
         Role = (UserRole)u.Role,
-        IsActive = u.IsActive
+        IsActive = u.IsActive,
+        Dni = u.Dni ?? string.Empty,
+        FechaAlta = u.FechaAlta,
+        FechaBaja = u.FechaBaja
     };
 }

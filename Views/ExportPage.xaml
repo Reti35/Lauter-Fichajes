@@ -55,6 +55,15 @@
                     </VerticalStackLayout>
                 </Grid>
 
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Empleado"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"/>
+                    <Picker ItemsSource="{Binding Employees}"
+                            SelectedItem="{Binding SelectedEmployee}"
+                            ItemDisplayBinding="{Binding DisplayName}"/>
+                </VerticalStackLayout>
+
                 <Button Text="Ver fichajes"
                         Command="{Binding LoadPreviewCommand}"
                         IsEnabled="{Binding IsNotLoading}"

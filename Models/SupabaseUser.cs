@@ -21,6 +21,15 @@ public class SupabaseUser : BaseModel
     [Column("is_active")]
     public bool IsActive { get; set; }
 
+    [Column("dni")]
+    public string? Dni { get; set; }
+
+    [Column("fecha_alta")]
+    public DateTime? FechaAlta { get; set; }
+
+    [Column("fecha_baja")]
+    public DateTime? FechaBaja { get; set; }
+
     public UserRole GetUserRole() => Role switch
     {
         "admin" => UserRole.Admin,

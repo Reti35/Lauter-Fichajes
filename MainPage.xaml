@@ -219,7 +219,7 @@
                         </Border>
                     </Grid>
 
-                    <!-- ─── Card: Crear usuario (solo admin) ──────────────── -->
+                    <!-- ─── Card: Gestión de usuarios (solo admin) ──────────────── -->
                     <Border IsVisible="{Binding IsAdmin}"
                             BackgroundColor="{AppThemeBinding Light={StaticResource AppCardBgLight}, Dark={StaticResource AppCardBgDark}}"
                             Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#374151}"
@@ -228,7 +228,7 @@
                             Margin="16,6,16,0">
                         <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding GoToCreateUserCommand}"/>
+                            <TapGestureRecognizer Command="{Binding GoToUserListCommand}"/>
                         </Border.GestureRecognizers>
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                             <Border Grid.Column="0"
@@ -238,16 +238,16 @@
                                     HorizontalOptions="Center"
                                     VerticalOptions="Center">
                                 <Border.StrokeShape><RoundRectangle CornerRadius="50"/></Border.StrokeShape>
-                                <Label Text="👤"
+                                <Label Text="👥"
                                        FontSize="22"
                                        HorizontalTextAlignment="Center"/>
                             </Border>
                             <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                <Label Text="Crear usuario"
+                                <Label Text="Gestión de usuarios"
                                        FontSize="13"
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light={StaticResource AppTextSecondaryLight}, Dark={StaticResource AppTextSecondaryDark}}"/>
-                                <Label Text="Añadir nuevo empleado o gestor"
+                                <Label Text="Ver, editar y dar de baja empleados"
                                        FontSize="11"
                                        TextColor="{AppThemeBinding Light={StaticResource AppTextMutedLight}, Dark={StaticResource AppTextMutedDark}}"/>
                             </VerticalStackLayout>

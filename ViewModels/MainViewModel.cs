@@ -89,7 +89,12 @@ public partial class MainViewModel : ObservableObject
         IsAdmin = user.Role == Models.UserRole.Admin;
 
         if (IsManagerOrAdmin)
+        {
             await LoadEmployeesAsync();
+            // Rellena el caché local con los fichajes de TODOS los empleados antes del primer
+            // render — de lo contrario solo aparecerían los propios (nunca descargados para otros).
+            await _fichajeService.SyncAllUsersFromSupabaseAsync();
+        }
 
         await RefreshStatusAsync();
         await LoadGroupedFichajesAsync();
@@ -108,7 +113,7 @@ public partial class MainViewModel : ObservableObject
         Employees.Clear();
         Employees.Add(EmployeeFilter.All);
         foreach (var u in users.OrderBy(u => u.FullName))
-            Employees.Add(new EmployeeFilter { Id = u.Id, DisplayName = u.FullName });
+            Employees.Add(new EmployeeFilter { Id = u.Id, DisplayName = u.IsActive ? u.FullName : $"{u.FullName} (baja)" });
 
         SelectedEmployee = Employees[0]; // "Todos los empleados"
     }
@@ -178,7 +183,9 @@ public partial class MainViewModel : ObservableObject
         try
         {
             await _fichajeService.SyncPendingAsync(_userId);
-            var hasNew = await _fichajeService.SyncFromSupabaseAsync(_userId);
+            var hasNew = IsManagerOrAdmin
+                ? await _fichajeService.SyncAllUsersFromSupabaseAsync()
+                : await _fichajeService.SyncFromSupabaseAsync(_userId);
             if (!hasNew) return;
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
@@ -201,7 +208,10 @@ public partial class MainViewModel : ObservableObject
         try
         {
             if (IsManagerOrAdmin)
+            {
                 await LoadEmployeesAsync();   // syncs users from Supabase + reloads list
+                await _fichajeService.SyncAllUsersFromSupabaseAsync();
+            }
             await RefreshStatusAsync();
             await LoadGroupedFichajesAsync();
             _ = SyncAndRefreshAsync();
@@ -257,7 +267,7 @@ public partial class MainViewModel : ObservableObject
     private async Task GoToExportAsync() => await Shell.Current.GoToAsync("export");
 
     [RelayCommand]
-    private async Task GoToCreateUserAsync() => await Shell.Current.GoToAsync("createuser");
+    private async Task GoToUserListAsync() => await Shell.Current.GoToAsync("userlist");
 
     [RelayCommand]
     private async Task LogoutAsync()

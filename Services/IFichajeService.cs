@@ -21,5 +21,10 @@ public interface IFichajeService
     /// <summary>Descarga de Supabase los fichajes del usuario que no existen localmente.</summary>
     /// <returns>true si se insertaron registros nuevos.</returns>
     Task<bool> SyncFromSupabaseAsync(string userId);
-    Task<List<FichajeExportRow>> GetAllForExportAsync(DateTime from, DateTime to);
+    /// <summary>Descarga de Supabase los fichajes de TODOS los usuarios que no existen localmente.
+    /// Solo debe llamarse para admin/gestor (la policy RLS "Managers can read all fichajes" lo permite).</summary>
+    /// <returns>true si se insertaron registros nuevos.</returns>
+    Task<bool> SyncAllUsersFromSupabaseAsync();
+    /// <param name="filterByUserId">Restringir la exportación a un empleado concreto (null = todos).</param>
+    Task<List<FichajeExportRow>> GetAllForExportAsync(DateTime from, DateTime to, string? filterByUserId = null);
 }

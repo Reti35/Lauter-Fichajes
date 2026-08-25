@@ -6,15 +6,30 @@ namespace Lauter_Fichaje.Services;
 public class LocalStorageService : ILocalStorageService
 {
     private SQLiteAsyncConnection? _db;
+    private readonly SemaphoreSlim _initLock = new(1, 1);
 
     private async Task<SQLiteAsyncConnection> GetDbAsync()
     {
         if (_db is not null) return _db;
-        var path = Path.Combine(FileSystem.AppDataDirectory, "lauter.db");
-        _db = new SQLiteAsyncConnection(path);
-        await _db.CreateTableAsync<LocalUser>();
-        await _db.CreateTableAsync<LocalSession>();
-        return _db;
+
+        // Guards against concurrent callers (e.g. App.CreateWindow and MainPage.OnAppearing
+        // both racing to authenticate at startup) racing past the `_db is not null` check
+        // and querying a table before its CreateTableAsync has completed.
+        await _initLock.WaitAsync();
+        try
+        {
+            if (_db is not null) return _db;
+            var path = Path.Combine(FileSystem.AppDataDirectory, "lauter.db");
+            var db = new SQLiteAsyncConnection(path);
+            await db.CreateTableAsync<LocalUser>();
+            await db.CreateTableAsync<LocalSession>();
+            _db = db;
+            return _db;
+        }
+        finally
+        {
+            _initLock.Release();
+        }
     }
 
     public async Task InitializeAsync() => await GetDbAsync();
@@ -42,7 +57,10 @@ public class LocalStorageService : ILocalStorageService
             FullName = user.FullName,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
             Role = (int)user.Role,
-            IsActive = user.IsActive
+            IsActive = user.IsActive,
+            Dni = user.Dni,
+            FechaAlta = user.FechaAlta,
+            FechaBaja = user.FechaBaja
         };
         if (existing is null) await db.InsertAsync(local);
         else await db.UpdateAsync(local);
@@ -85,7 +103,10 @@ public class LocalStorageService : ILocalStorageService
             FullName     = user.FullName,
             PasswordHash = existing?.PasswordHash ?? string.Empty,
             Role         = (int)user.Role,
-            IsActive     = user.IsActive
+            IsActive     = user.IsActive,
+            Dni          = user.Dni,
+            FechaAlta    = user.FechaAlta,
+            FechaBaja    = user.FechaBaja
         };
         if (existing is null) await db.InsertAsync(local);
         else await db.UpdateAsync(local);

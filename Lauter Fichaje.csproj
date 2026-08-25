@@ -8,10 +8,8 @@
 	<Import Project="Secrets.props" Condition="Exists('Secrets.props')" />
 
 	<Target Name="ValidateSupabaseCredentials" BeforeTargets="BeforeBuild">
-		<Error Condition="'$(SupabaseUrl)' == ''"
-		       Text="SupabaseUrl no está definida.%0ACopia 'Secrets.template.props' como 'Secrets.props' y rellena tus credenciales.%0AAlternativamente: dotnet build -p:SupabaseUrl=URL -p:SupabaseAnonKey=KEY" />
-		<Error Condition="'$(SupabaseAnonKey)' == ''"
-		       Text="SupabaseAnonKey no está definida.%0ACopia 'Secrets.template.props' como 'Secrets.props' y rellena tus credenciales.%0AAlternativamente: dotnet build -p:SupabaseUrl=URL -p:SupabaseAnonKey=KEY" />
+		<Error Condition="'$(SupabaseUrl)' == ''" Text="SupabaseUrl no está definida.%0ACopia 'Secrets.template.props' como 'Secrets.props' y rellena tus credenciales.%0AAlternativamente: dotnet build -p:SupabaseUrl=URL -p:SupabaseAnonKey=KEY" />
+		<Error Condition="'$(SupabaseAnonKey)' == ''" Text="SupabaseAnonKey no está definida.%0ACopia 'Secrets.template.props' como 'Secrets.props' y rellena tus credenciales.%0AAlternativamente: dotnet build -p:SupabaseUrl=URL -p:SupabaseAnonKey=KEY" />
 	</Target>
 
 	<ItemGroup>
@@ -95,11 +93,22 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <AndroidResource Remove="Platforms\MacCatalyst\**" />
+	  <Compile Remove="Platforms\MacCatalyst\**" />
+	  <EmbeddedResource Remove="Platforms\MacCatalyst\**" />
+	  <MauiCss Remove="Platforms\MacCatalyst\**" />
+	  <MauiXaml Remove="Platforms\MacCatalyst\**" />
+	  <None Remove="Platforms\MacCatalyst\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.18.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.android" Version="2.1.12" />
 		<PackageReference Include="supabase-csharp" Version="0.16.2" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.9" />
